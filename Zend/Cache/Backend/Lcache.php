@@ -32,7 +32,7 @@ class Zend_Cache_Backend_Lcache extends Zend_Cache_Backend implements Zend_Cache
 		),
 		'l2' => array(
 			'type' => 'mysql',
-			'table_prefix' => 'xg_',
+			'prefix' => 'xg_',
 			'config' => array()
 		)
 	);
@@ -392,7 +392,7 @@ class Zend_Cache_Backend_Lcache extends Zend_Cache_Backend implements Zend_Cache
 						)
 					);
 
-					$this->_l2 = new DatabaseL2($db->getConnection(), $this->_options['l2']['table_prefix'], true);
+					$this->_l2 = new DatabaseL2($db->getConnection(), $this->_options['l2']['prefix'], true);
 				} catch (Zend_Db_Adapter_Exception $e) {
 					Zend_Cache::throwException('Failed to connect to the MySQL Server!', $e);
 				}
