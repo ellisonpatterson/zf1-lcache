@@ -16,12 +16,13 @@ require_once 'Zend/Cache/Backend.php';
 
 class Zend_Cache_Backend_Lcache extends Zend_Cache_Backend implements Zend_Cache_Backend_Interface
 {
-    /**
-     * LCache backend options
-     * @var array
-     */
-    protected $_options = array(
-        'bin' => 's1',
+	/**
+	 * LCache backend options
+	 *
+	 * @var array
+	 */
+	protected $_options = array(
+		'bin' => 's1',
 		'pool' => 'p1',
 		'group' => 'default',
 		'can_expire' => true,
@@ -34,10 +35,10 @@ class Zend_Cache_Backend_Lcache extends Zend_Cache_Backend implements Zend_Cache
 			'table_prefix' => 'xg_',
 			'config' => array()
 		)
-    );
+	);
 
 	/**
-	 * Holds the cached objects
+	 * Holds the cached data
 	 *
 	 * @var array
 	 */
@@ -48,21 +49,21 @@ class Zend_Cache_Backend_Lcache extends Zend_Cache_Backend implements Zend_Cache
      *
      * @var mixed $_lcache
      */
-    protected $_lcache = null;
+	protected $_lcache = null;
 
     /**
      * L1 object
      *
      * @var mixed $_l1
      */
-    protected $_l1 = null;
+	protected $_l1 = null;
 
     /**
      * L2 object
      *
      * @var mixed $_l2
      */
-    protected $_l2 = null;
+	protected $_l2 = null;
 
     /**
      * Constructor
@@ -71,16 +72,16 @@ class Zend_Cache_Backend_Lcache extends Zend_Cache_Backend implements Zend_Cache
      * @throws Zend_Cache_Exception
      * @return void
      */
-    public function __construct(array $options = array())
-    {
-        parent::__construct($options);
+	public function __construct(array $options = array())
+	{
+		parent::__construct($options);
 
 		if (!class_exists('\LCache\NullL1')) {
-            Zend_Cache::throwException('Missing LCache library!');
+			Zend_Cache::throwException('Missing LCache library!');
 		}
 
 		if (!class_exists('\LCache\NullL1')) {
-            Zend_Cache::throwException('Missing LCache library!');
+			Zend_Cache::throwException('Missing LCache library!');
 		}
 
 		if ($this->_options['l1']['type'] == 'apcu' && php_sapi_name() !== 'cli') {
@@ -97,28 +98,26 @@ class Zend_Cache_Backend_Lcache extends Zend_Cache_Backend implements Zend_Cache
 		}
 
 		if (-1 === version_compare(PHP_VERSION, '5.6')) {
-            Zend_Cache::throwException('PHP 5.6 or greater is required!');
+			Zend_Cache::throwException('PHP 5.6 or greater is required!');
 		}
 
 		if ($this->_options['pool'] == 'hostname') {
 			$this->setOption('pool', gethostname());
 		}
-    }
+	}
 
-    /**
-     * Test if a cache is available for the given id and (if yes) return it (false else)
-     *
-     * Note : return value is always "string" (unserialization is done by the core not by the backend)
-     *
-     * @param  string  $id                     Cache id
-     * @param  boolean $doNotTestCacheValidity If set to true, the cache validity won't be tested
-     * @return string|false cached datas
-     */
+	/**
+	 * Test if a cache is available for the given id and (if yes) return it (false else)
+	 *
+	 * @param  string  $id                     Cache id
+	 * @param  boolean $doNotTestCacheValidity If set to true, the cache validity won't be tested
+	 * @return string|false cached datas
+	 */
 	public function load($id, $doNotTestCacheValidity = false)
 	{
-        if ($doNotTestCacheValidity) {
-            $this->_log("Zend_Cache_Backend_Lcache::load() : \$doNotTestCacheValidity=true is unsupported by the LCache backend");
-        }
+		if ($doNotTestCacheValidity) {
+			$this->_log("Zend_Cache_Backend_Lcache::load() : \$doNotTestCacheValidity=true is unsupported by the LCache backend");
+		}
 
 		if ($this->_issetInternal($id)) {
 			return $this->_getInternal($id);
@@ -137,14 +136,17 @@ class Zend_Cache_Backend_Lcache extends Zend_Cache_Backend implements Zend_Cache
 		return $value;
 	}
 
-    /**
-     * Test if a cache is available or not (for the given id)
-     *
-     * @param  string $id cache id
-     * @return mixed false (a cache is not available) or "last modified" timestamp (int) of the available cache record
-     */
-    public function test($id)
-    {
+	/**
+	 * Test if a cache is available for the given id and (if yes) return it (false else)
+	 *
+	 * Note : return value is always "string" (unserialization is done by the core not by the backend)
+	 *
+	 * @param  string  $id                     Cache id
+	 * @param  boolean $doNotTestCacheValidity If set to true, the cache validity won't be tested
+	 * @return string|false cached datas
+	 */
+	public function test($id)
+	{
 		if ($this->_issetInternal($id)) {
 			return true;
 		}
@@ -152,18 +154,18 @@ class Zend_Cache_Backend_Lcache extends Zend_Cache_Backend implements Zend_Cache
 		return $this->callLCache('exists', array($id));
 	}
 
-    /**
-     * Save some string datas into a cache record
-     *
-     * Note : $data is always "string" (serialization is done by the
-     * core not by the backend)
-     *
-     * @param  string $data            Datas to cache
-     * @param  string $id              Cache id
-     * @param  array $tags             Array of strings, the cache record will be tagged by each string entry
-     * @param  int   $specificLifetime If != false, set a specific lifetime for this cache record (null => infinite lifetime)
-     * @return boolean true if no problem
-     */
+	/**
+	 * Save some string datas into a cache record
+	 *
+	 * Note : $data is always "string" (serialization is done by the
+	 * core not by the backend)
+	 *
+	 * @param  string $data             Datas to cache
+	 * @param  string $id               Cache id
+	 * @param  array  $tags             Array of strings, the cache record will be tagged by each string entry
+	 * @param  int    $specificLifetime If != false, set a specific lifetime for this cache record (null => infinite lifetime)
+	 * @return boolean True if no problem
+	 */
 	public function save($data, $id, $tags = array(), $specificLifetime = null)
 	{
 		if (is_object($data)) {
@@ -184,12 +186,18 @@ class Zend_Cache_Backend_Lcache extends Zend_Cache_Backend implements Zend_Cache
 		return (bool) $this->callLCache('set', array($id), $data, $lifetime);
 	}
 
-    /**
-     * Remove a cache record
-     *
-     * @param  string $id cache id
-     * @return boolean true if no problem
-     */
+	/**
+	 * Save some string datas into a cache record
+	 *
+	 * Note : $data is always "string" (serialization is done by the
+	 * core not by the backend)
+	 *
+	 * @param  string $data            Datas to cache
+	 * @param  string $id              Cache id
+	 * @param  array $tags             Array of strings, the cache record will be tagged by each string entry
+	 * @param  int   $specificLifetime If != false, set a specific lifetime for this cache record (null => infinite lifetime)
+	 * @return boolean true if no problem
+	 */
 	public function remove($id)
 	{
 		if (!$this->test($id)) {
@@ -202,43 +210,49 @@ class Zend_Cache_Backend_Lcache extends Zend_Cache_Backend implements Zend_Cache
 		return true;
 	}
 
-    /**
-     * Clean some cache records
-     *
-     * Available modes are :
-     * Zend_Cache::CLEANING_MODE_ALL (default)    => remove all cache entries ($tags is not used)
-     * Zend_Cache::CLEANING_MODE_OLD              => remove too old cache entries ($tags is not used)
-     * Zend_Cache::CLEANING_MODE_MATCHING_TAG     => remove cache entries matching all given tags
-     *                                               ($tags can be an array of strings or a single string)
-     * Zend_Cache::CLEANING_MODE_NOT_MATCHING_TAG => remove cache entries not {matching one of the given tags}
-     *                                               ($tags can be an array of strings or a single string)
-     * Zend_Cache::CLEANING_MODE_MATCHING_ANY_TAG => remove cache entries matching any given tags
-     *                                               ($tags can be an array of strings or a single string)
-     *
-     * @param  string $mode Clean mode
-     * @param  array  $tags Array of tags
-     * @return boolean true if no problem
-     */
+	/**
+	 * Remove a cache record
+	 *
+	 * @param  string $id cache id
+	 * @return boolean true if no problem
+	 */
 	public function clean($mode = Zend_Cache::CLEANING_MODE_ALL, $tags = array())
 	{
-        switch ($mode) {
-            case Zend_Cache::CLEANING_MODE_ALL:
-                return $this->callLCache('delete', array(null));
-                break;
-            case Zend_Cache::CLEANING_MODE_OLD:
-                $this->_log("Zend_Cache_Backend_Lcache::clean() : CLEANING_MODE_OLD is unsupported by the Apc backend");
-                break;
-            case Zend_Cache::CLEANING_MODE_MATCHING_TAG:
-            case Zend_Cache::CLEANING_MODE_NOT_MATCHING_TAG:
-            case Zend_Cache::CLEANING_MODE_MATCHING_ANY_TAG:
-                $this->_log(self::TAGS_UNSUPPORTED_BY_CLEAN_OF_APC_BACKEND);
-                break;
-            default:
-                Zend_Cache::throwException('Invalid mode for clean() method');
-                break;
-        }
+		switch ($mode) {
+			case Zend_Cache::CLEANING_MODE_ALL:
+				return $this->callLCache('delete', array(null));
+				break;
+			case Zend_Cache::CLEANING_MODE_OLD:
+				$this->_log("Zend_Cache_Backend_Lcache::clean() : CLEANING_MODE_OLD is unsupported by the Apc backend");
+				break;
+			case Zend_Cache::CLEANING_MODE_MATCHING_TAG:
+			case Zend_Cache::CLEANING_MODE_NOT_MATCHING_TAG:
+			case Zend_Cache::CLEANING_MODE_MATCHING_ANY_TAG:
+				$this->_log(self::TAGS_UNSUPPORTED_BY_CLEAN_OF_APC_BACKEND);
+				break;
+			default:
+				Zend_Cache::throwException('Invalid mode for clean() method');
+				break;
+		}
 	}
 
+	/**
+	 * Clean some cache records
+	 *
+	 * Available modes are :
+	 * Zend_Cache::CLEANING_MODE_ALL (default)    => remove all cache entries ($tags is not used)
+	 * Zend_Cache::CLEANING_MODE_OLD              => remove too old cache entries ($tags is not used)
+	 * Zend_Cache::CLEANING_MODE_MATCHING_TAG     => remove cache entries matching all given tags
+	 *                                               ($tags can be an array of strings or a single string)
+	 * Zend_Cache::CLEANING_MODE_NOT_MATCHING_TAG => remove cache entries not {matching one of the given tags}
+	 *                                               ($tags can be an array of strings or a single string)
+	 * Zend_Cache::CLEANING_MODE_MATCHING_ANY_TAG => remove cache entries matching any given tags
+	 *                                               ($tags can be an array of strings or a single string)
+	 *
+	 * @param  string $mode Clean mode
+	 * @param  array  $tags Array of tags
+	 * @return boolean true if no problem
+	 */
 	public function callLCache($method)
 	{
 		$arguments = func_get_args();
@@ -336,17 +350,17 @@ class Zend_Cache_Backend_Lcache extends Zend_Cache_Backend implements Zend_Cache
 		}
 	}
 
-    /**
-     * Return the connection resource
-     *
-     * If we are not connected, the connection is made
-     *
-     * @throws Zend_Cache_Exception
-     * @return resource Connection resource
-     */
+	/**
+	 * Return the connection resource
+	 *
+	 * If we are not connected, the connection is made
+	 *
+	 * @throws Zend_Cache_Exception
+	 * @return resource Connection resource
+	 */
 	protected function _getConnection()
 	{
-        if ($this->_lcache === null) {
+		if ($this->_lcache === null) {
 			$pool = $this->_options['pool'];
 			$l1Config = $this->_options['l1']['config'];
 
