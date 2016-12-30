@@ -23,7 +23,7 @@ class Zend_Cache_Backend_Lcache extends Zend_Cache_Backend implements Zend_Cache
 	 */
 	protected $_options = array(
 		'bin' => 's1',
-		'pool' => 'p1',
+		'pool' => null,
 		'group' => 'default',
 		'can_expire' => true,
 		'l1' => array(
